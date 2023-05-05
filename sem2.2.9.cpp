@@ -1,6 +1,14 @@
 ﻿#include <iostream>
 #include <fstream>
+#include <math.h>
 using namespace std;
+
+// короче надо сделать N попыток из (x*,y*), и каждый раз когда мы приходим в точку (xi,yi) границы мы типа
+// суммируем значение f в этой точке границы и так N раз
+// цель: переделать систему определения границы, потому что пока что это такое себе, можно лучше,
+// причём есть вероятность попасть в неграничную точку, но тогда мы выберем точку, ближайшую к этой
+//
+// среди идей сделать чтобы wander возвращала точку прихода, чтобы потом передать её в f
 
 int T[12] = { 1, 0, 1, 1 };
 
@@ -22,43 +30,40 @@ void transformT() {
 }
 
 struct Point {
-	double x = 0, y = 0;
+	float x = 0, y = 0;
 };
 
 Point transformToLocal(Point x) {
-	return {x.x*5, x.y*5};
+	return { x.x * 5, x.y * 5 };
 }
 
-struct Plot {
-	bool** oblast;
-	Plot() {
-		oblast = new bool* [21];
-		for (int i = 0; i < 21; i++) {
-			oblast[i] = new bool[12];
-			for (int r = 0; r < 12; r++) oblast[i][r] = true;
-		}
-	}
-	~Plot() {
-		for (int i = 0; i < 21; i++) {
-			delete[] oblast[i];
-		}
-		delete[] oblast;
-	}
-} base;
+int N;
 
+//Point border[60];
+
+//void generateBorder() {
+//	for (int i = 0; i < 20; i += 2) {
+//		border[i] = { i / 10.f, i / 10.f };
+//		border[i + 1] = { i / 10.f, (i + 2) / 10.f };
+//		border[20 + i] = { (20 + i) / 10.f, 4 - (20 + i) / 10.f };
+//		border[20 + i + 1] = { (20 + i + 2) / 10.f, 4 - (20 + i) / 10.f };
+//	}
+//	for (int i = 40; i < 60; i++) {
+//		border[i] = { 4 - (i - 40) / 5.f, 0 };
+//	}
+//}
 
 //(x   + h, y), (x   + h, y−h), (x   + h, y + h),       (x−h, y), (x−h, y−h), (x−h, y   + h),  (x, y−h), (x, y   + h)
 
-Point bp;
-const double h = 0.2;
+const float h = 0.2;
 
-double f(Point x) {
+float f(Point x) {
 	return 0.f;
 }
 
 void move(Point& p) {
 	unsigned short int direction = T[1] * 4 + T[6] * 2 + T[9];
-	double x = p.x, y = p.y;
+	float x = p.x, y = p.y;
 	switch (direction) {
 	case 0:
 		p = { x + h, y };
@@ -88,38 +93,44 @@ void move(Point& p) {
 	transformT();
 }
 
-/*
-	короче видимо смысл в том, что я должен из какой то конкретной точки найти количество блужданий в точку (xi,yi) и найти значение f(xi,yi)
-	а потом ещё нужно сделать так для каждой точки границы
-	и нужно поделить на количество блужданий? в общем непонятно в обозначениях здесь всё
+void test(Point&);
 
-	нужно ещё возможно переделать способ хранения границы в массиве и для нормальной индексации создать массив с граничными точками, чтоб можно было по i обращаться
-*/
-
-int wander(Point a) {
-	/*int phi = 0;
-	while (base.oblast[int(transformToLocal(a).x)][int(transformToLocal(a).y)] == false) {
-		move(a);
-		phi++;
-	}
-	bp = a;
-	return phi;*/
+Point wander(Point a) {
+	do {
+		test(a);
+	} while ((a.y < -(abs(a.x-2)) + 2) && a.y > 0);
+	cout << "Была достигнута граница в точке (" << a.x << ' ' << a.y <<')';
+	system("pause");
+	return a;
 }
 
-double u(Point a) {
-	int phi = wander(a);
-	double sum = 0;
+float u(Point a) {
+	float sum = 0;
+	for (int i = 0; i < N; i++) sum+= f(wander(a));
+	return sum;
+}
+
+void test(Point& p) {
+	//while (true) {
+		system("cls");
+		cout << "Совершено блуждание из точки " << p.x << ' ' << p.y << " в точку ";
+		move(p);
+		cout << p.x << ' ' << p.y << '\n';
+		cout << "Массив направлений T: ";
+		for (int i : T) cout << i << ' ';
+		cout << '\n' << "В том числе определяющие элементы " << T[1] << ' ' << T[6] << ' ' << T[9] << endl;
+		system("pause");
+	//}
 }
 
 int main() {
-	int N;
-	cout << "Количество блужданий N: ";
-	cin >> N;
-	for (int i = 1; i < 11; i++) {
-		for (int j = i; j <= 20 - i; j++) base.oblast[j][i] = false;
-	}
-	cout << "\nКоординаты (x,y): ";
-	Point x;
-	cin >> x.x >> x.y;
-	double resU = u(x);
+	/*generateBorder();*/
+	Point p;
+	setlocale(LC_ALL, "rus");
+	cout << "Введите количество блужданий: "; cin >> N;
+	cout << "Введите точку (x*,y*): "; cin >> p.x >> p.y;
+	p.x = round(p.x * 10) / 10;
+	p.y = round(p.y * 10) / 10;
+	cout << u(p);
+	//cout << "Результат: " << u(p);
 }
