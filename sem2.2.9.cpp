@@ -1,16 +1,10 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <math.h>
 using namespace std;
 
-// короче надо сделать N попыток из (x*,y*), и каждый раз когда мы приходим в точку (xi,yi) границы мы типа
-// суммируем значение f в этой точке границы и так N раз
-// цель: переделать систему определения границы, потому что пока что это такое себе, можно лучше,
-// причём есть вероятность попасть в неграничную точку, но тогда мы выберем точку, ближайшую к этой
-//
-// среди идей сделать чтобы wander возвращала точку прихода, чтобы потом передать её в f
+int N;
 
-int T[12] = { 1, 0, 1, 1 };
+int T[12] = { 0 };
 
 void intToBin(int x) {
 	for (int i = 11; i >= 0; i--) {
@@ -30,14 +24,16 @@ void transformT() {
 }
 
 struct Point {
-	float x = 0, y = 0;
+	double x = 0, y = 0;
 };
 
-Point transformToLocal(Point x) {
-	return { x.x * 5, x.y * 5 };
-}
+struct iPoint {
+	int x = 0, y = 0;
+};
 
-int N;
+iPoint transformI(Point x) {
+	return { int(x.x * 10), int(x.y * 10) };
+}
 
 //Point border[60];
 
@@ -55,15 +51,15 @@ int N;
 
 //(x   + h, y), (x   + h, y−h), (x   + h, y + h),       (x−h, y), (x−h, y−h), (x−h, y   + h),  (x, y−h), (x, y   + h)
 
-const float h = 0.2;
+const double h = 0.2;
 
-float f(Point x) {
-	return 0.f;
+double f(Point x) {
+	return x.x + x.y;
 }
 
 void move(Point& p) {
 	unsigned short int direction = T[1] * 4 + T[6] * 2 + T[9];
-	float x = p.x, y = p.y;
+	double x = p.x, y = p.y;
 	switch (direction) {
 	case 0:
 		p = { x + h, y };
@@ -93,44 +89,44 @@ void move(Point& p) {
 	transformT();
 }
 
-void test(Point&);
+//void test(Point& p) {
+//	system("cls");
+//	cout << "Совершено блуждание из точки " << p.x << ' ' << p.y << " в точку ";
+//	move(p);
+//	cout << p.x << ' ' << p.y << '\n';
+//	cout << "Массив направлений T: ";
+//	for (int i : T) cout << i << ' ';
+//	cout << '\n' << "В том числе определяющие элементы " << T[1] << ' ' << T[6] << ' ' << T[9] << endl;
+//	system("pause");
+//}
 
 Point wander(Point a) {
+	iPoint temp = transformI(a);
 	do {
-		test(a);
-	} while ((a.y < -(abs(a.x-2)) + 2) && a.y > 0);
-	cout << "Была достигнута граница в точке (" << a.x << ' ' << a.y <<')';
+		move(a);
+		temp = transformI(a);
+	} while ((temp.y < -(abs(temp.x - 20)) + 20) && temp.y > 0);
+	cout << "Была достигнута граница в точке (" << a.x << ' ' << a.y << ")\n";
 	system("pause");
 	return a;
 }
 
-float u(Point a) {
-	float sum = 0;
-	for (int i = 0; i < N; i++) sum+= f(wander(a));
-	return sum;
-}
-
-void test(Point& p) {
-	//while (true) {
-		system("cls");
-		cout << "Совершено блуждание из точки " << p.x << ' ' << p.y << " в точку ";
-		move(p);
-		cout << p.x << ' ' << p.y << '\n';
-		cout << "Массив направлений T: ";
-		for (int i : T) cout << i << ' ';
-		cout << '\n' << "В том числе определяющие элементы " << T[1] << ' ' << T[6] << ' ' << T[9] << endl;
-		system("pause");
-	//}
+double u(Point a) {
+	iPoint temp = transformI(a);
+	if ((temp.y >= -(abs(temp.x - 20)) + 20) || temp.y <= 0) {
+		return (temp.y > -(abs(temp.x - 20)) + 20 || temp.y < 0) ? 0 : f(a);
+	}
+	double sum = 0;
+	for (int i = 0; i < N; i++) sum += f(wander(a));
+	return sum / N;
 }
 
 int main() {
-	/*generateBorder();*/
 	Point p;
 	setlocale(LC_ALL, "rus");
 	cout << "Введите количество блужданий: "; cin >> N;
+	if (N <= 0) { cout << "Неправильный ввод"; return 1; }
+	intToBin(N % 4096);
 	cout << "Введите точку (x*,y*): "; cin >> p.x >> p.y;
-	p.x = round(p.x * 10) / 10;
-	p.y = round(p.y * 10) / 10;
-	cout << u(p);
-	//cout << "Результат: " << u(p);
+	cout << "Результат: " << u(p);
 }
