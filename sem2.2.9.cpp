@@ -106,8 +106,8 @@ Point wander(Point a) {
 		move(a);
 		temp = transformI(a);
 	} while ((temp.y < -(abs(temp.x - 20)) + 20) && temp.y > 0);
-	cout << "Была достигнута граница в точке (" << a.x << ' ' << a.y << ")\n";
-	system("pause");
+	//cout << "Была достигнута граница в точке (" << a.x << ' ' << a.y << ")\n";
+	//system("pause");
 	return a;
 }
 
