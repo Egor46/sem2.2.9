@@ -34,21 +34,6 @@ struct iPoint {
 iPoint transformI(Point x) {
 	return { int(x.x * 10), int(x.y * 10) };
 }
-
-//Point border[60];
-
-//void generateBorder() {
-//	for (int i = 0; i < 20; i += 2) {
-//		border[i] = { i / 10.f, i / 10.f };
-//		border[i + 1] = { i / 10.f, (i + 2) / 10.f };
-//		border[20 + i] = { (20 + i) / 10.f, 4 - (20 + i) / 10.f };
-//		border[20 + i + 1] = { (20 + i + 2) / 10.f, 4 - (20 + i) / 10.f };
-//	}
-//	for (int i = 40; i < 60; i++) {
-//		border[i] = { 4 - (i - 40) / 5.f, 0 };
-//	}
-//}
-
 //(x   + h, y), (x   + h, y−h), (x   + h, y + h),       (x−h, y), (x−h, y−h), (x−h, y   + h),  (x, y−h), (x, y   + h)
 
 const double h = 0.2;
@@ -106,8 +91,6 @@ Point wander(Point a) {
 		move(a);
 		temp = transformI(a);
 	} while ((temp.y < -(abs(temp.x - 20)) + 20) && temp.y > 0);
-	//cout << "Была достигнута граница в точке (" << a.x << ' ' << a.y << ")\n";
-	//system("pause");
 	return a;
 }
 
