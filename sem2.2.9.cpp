@@ -74,17 +74,6 @@ void move(Point& p) {
 	transformT();
 }
 
-//void test(Point& p) {
-//	system("cls");
-//	cout << "Совершено блуждание из точки " << p.x << ' ' << p.y << " в точку ";
-//	move(p);
-//	cout << p.x << ' ' << p.y << '\n';
-//	cout << "Массив направлений T: ";
-//	for (int i : T) cout << i << ' ';
-//	cout << '\n' << "В том числе определяющие элементы " << T[1] << ' ' << T[6] << ' ' << T[9] << endl;
-//	system("pause");
-//}
-
 Point wander(Point a) {
 	iPoint temp = transformI(a);
 	do {
